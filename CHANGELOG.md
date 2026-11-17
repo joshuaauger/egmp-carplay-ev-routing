@@ -1,3 +1,8 @@
+# 0.4.4-ceev.4 — experimental fork build
+
+- Fixes the Ioniq 6 start failure: the runtime only took a 77 400 Wh battery, and the Ioniq 6 profile is 74 000 Wh (usable), so the EV service threw "unsupported capacity" and Iap2Service.onCreate's hook failed. Any capacity from 10 to 200 kWh is now accepted.
+- A failure while reading the profile now logs `CarPlayEV start failed: …` too (it was thrown before the logging started).
+
 # 0.4.4-ceev.3 — experimental fork build
 
 - Logs why the CarPlay EV service failed to start (`CarPlayEV start failed: …`, `CarPlayEV native load failed: …`) as one readable line, ahead of the stack trace.

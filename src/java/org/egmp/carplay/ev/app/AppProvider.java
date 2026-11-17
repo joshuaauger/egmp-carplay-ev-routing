@@ -30,8 +30,9 @@ public final class AppProvider {
     }
     public static synchronized void start(ModContext mod,LoadedApp app,Object service,String profile) throws Throwable {
         if(instance!=null)return;
-        AppProvider next=new AppProvider(mod,app,service,profile);
+        AppProvider next=null;
         try {
+        next=new AppProvider(mod,app,service,profile);
         int opened=NativeBridge.open();if(opened!=0)throw new IllegalStateException("native open="+opened);
         // CarPlayStartSession: answer the phone's CarPlayAvailability with the Wi-Fi, AirPlay identity and theme asset.
         // The theme itself is named in the identification by the Wireless CarPlay mod (EvRouting.registerTheme).
@@ -49,7 +50,7 @@ public final class AppProvider {
         Iap2ListenerInfo info=new Iap2ListenerInfo();info.onSetListenerName("CarPlayEV");info.onSetSupportType(0x100);
         instance=next;
         if(!next.binder.Iap2SvcInit(next.listener,info))throw new IllegalStateException("listener refused");
-        } catch(Throwable failure){mod.log("CarPlayEV start failed: "+failure);instance=null;next.close();throw failure;}
+        } catch(Throwable failure){mod.log("CarPlayEV start failed: "+failure);instance=null;if(next!=null)next.close();throw failure;}
         mod.log("CarPlayEV semantic listener registered");
     }
     public static synchronized void stop(){if(instance!=null){instance.close();instance=null;}}

@@ -66,6 +66,6 @@ The bundled Ioniq 5 consumption object, before runtime auxiliary replacement:
 - [Ioniq 5 profile](../vehicles/hyundai/ioniq-5/us-77kwh/profile.json).
 - [EV6 profile](../vehicles/kia/ev6/us-77kwh/profile.json): copied numerical values are **unvalidated and likely inaccurate**.
 
-The runtime requires the array lengths above, two connectors and 77400 Wh capacity. These are implementation constraints, not universal Apple-model rules. The builder signs one mod containing the profiles listed in [release.json](../release.json). Vehicle-specific parts select one active profile at Apply. Profile edits require rebuilding and signing the package.
+The runtime requires the array lengths above, two connectors and a capacity of 10 000–200 000 Wh. These are implementation constraints, not universal Apple-model rules. The builder signs one mod containing the profiles listed in [release.json](../release.json). Vehicle-specific parts select one active profile at Apply. Profile edits require rebuilding and signing the package.
 
 Keep units explicit, preserve array alignment and validate changes against measured charging/trip data. Installation success establishes neither calibration accuracy nor the unresolved interpolation/efficiency/index-selection semantics. See [Vehicle profiles](PROFILE.md) and [Validation](VALIDATION.md).

@@ -6,6 +6,6 @@ HMG-API’s vehicle-specific `parts` declarations select one profile when **Appl
 
 `vehicle.display_name` is used directly. `default_display_name` is reserved for a future reset feature; renaming is not implemented. Model IDs are decimal JSON integers identifying the charging and consumption models, not the car.
 
-Both bundled profiles use 77400 Wh. EV6 numerical values are copied from Ioniq 5, unvalidated and likely inaccurate. Product matching does not identify battery trim.
+The Ioniq 5 and EV6 profiles use 77400 Wh; the Ioniq 6 profile uses 74000 Wh (usable). EV6 numerical values are copied from Ioniq 5, unvalidated and likely inaccurate. Product matching does not identify battery trim.
 
 Runtime checks schema, name, model roles, connectors and array lengths. Auxiliary power starts from the profile default, then uses live or retained values in transmitted consumption JSON. The profile file is not rewritten. Profile changes require rebuilding and signing the package; automatic downloads are not implemented.

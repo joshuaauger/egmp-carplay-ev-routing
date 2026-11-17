@@ -51,7 +51,7 @@ public final class VehicleSource {
             if(type.equals("ccs1") && dc==0)dc=w;else if(type.equals("j1772") && ac==0)ac=w;else throw new IllegalArgumentException("connector type");}
         dcW=dc;acW=ac;
         JSONObject battery=p.getJSONObject("battery");minWh=battery.getInt("minimum_energy_wh");maxWh=battery.getInt("maximum_energy_wh");
-        if(minWh!=0 || maxWh!=77400)throw new IllegalArgumentException("unsupported capacity");
+        if(minWh!=0 || maxWh<10000 || maxWh>200000)throw new IllegalArgumentException("unsupported capacity "+maxWh);
         JSONObject ch=p.getJSONObject("charging_contract"),co=p.getJSONObject("consumption_contract");
         if(ch.getInt("model_id")!=12582922 || co.getInt("model_id")!=12582921)throw new IllegalArgumentException("contract roles");
         JSONObject cp=ch.getJSONObject("vehicle_parameters"),vp=co.getJSONObject("vehicle_parameters");

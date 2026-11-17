@@ -1,6 +1,6 @@
 [nemesis]
 version=1.1
-package-version=0.4.4-ceev.3
+package-version=0.4.4-ceev.4
 id=carplay.ev-routing
 name=E-GMP CarPlay EV Routing - Experimental
 type=application
