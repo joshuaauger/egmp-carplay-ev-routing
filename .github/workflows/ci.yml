@@ -136,8 +136,13 @@ jobs:
           t="v$v"
           awk -v v="$v" 'index($0,"# ")==1 || index($0,"## ")==1 { if (on) exit; if (index($0, v)) { on=1; next } } on' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
           printf '\nBuilt from %s (%s).\n' "${GITHUB_SHA:0:7}" "$GITHUB_REF_NAME" >> "$RUNNER_TEMP/notes.md"
-          files=$(ls dist/egmp-carplay-ev-routing-v*.zip dist/*SHA256SUMS 2>/dev/null)
-          [ -n "$files" ] || { echo "no packages to release"; exit 1; }
+          # the three packages, named as the other mods' releases name them: <name>.zip (HMG-API, USB HMGAPI/updates),
+          # <name>-nemesis-package.zip (NEMESIS Package Store), <name>-nemesis.zip (NEMESIS USB layout); plus the source
+          n="egmp-carplay-ev-routing-v$v"; A="$RUNNER_TEMP/assets"; rm -rf "$A"; mkdir -p "$A"
+          cp "dist/$n.zip" "dist/$n-source.zip" "dist/testing/$n-nemesis-package.zip" "$A/"
+          cp "dist/testing/$n-nemesis-usb.zip" "$A/$n-nemesis.zip"
+          (cd "$A" && sha256sum *.zip > SHA256SUMS && cat SHA256SUMS)
+          files=$(ls "$A"/*)
           if gh release view "$t" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$t" $files --clobber -R "$GITHUB_REPOSITORY"
             gh release edit "$t" --notes-file "$RUNNER_TEMP/notes.md" -R "$GITHUB_REPOSITORY"
