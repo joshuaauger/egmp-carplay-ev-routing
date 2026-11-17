@@ -92,8 +92,9 @@ jobs:
 
       - name: Package contents
         run: |
-          unzip -l dist/egmp-carplay-ev-routing-v*.zip | grep -v -- '-----' | grep -E "profiles/|settings.json|libcarplayev|mod.json"
-          cat out/build-report.json | head -40
+          Z=$(ls dist/egmp-carplay-ev-routing-v*.zip | grep -v -e -source.zip)
+          unzip -l "$Z" | grep -E "profiles/|settings.json|libcarplayev|mod.json" || true
+          head -40 out/build-report.json
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
