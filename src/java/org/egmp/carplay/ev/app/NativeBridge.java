@@ -11,4 +11,8 @@ public final class NativeBridge {
     public static native void shutdown();
     public static native int send(long clientHandle, int[] sample, byte[] charging, byte[] consumption);
     public static native int stop(long clientHandle);
+    /** The encoded CarPlayStartSession (0x4301) to answer CarPlayAvailability with; empty for off. */
+    public static native int startSession(byte[] message);
+    /** 0 offers seen, 1 answers sent, 2 last send result, 3 last offer length, 16+i its parameter bytes */
+    public static native int startSessionStatus(int which);
 }

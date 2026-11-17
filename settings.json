@@ -22,6 +22,14 @@
           "title": "44C9FA31EC-Single v547"
         }
       ]
+    },
+    {
+      "key": "carplay_start_session",
+      "type": "toggle",
+      "default": true,
+      "title": "CarPlay start session",
+      "description": "Answers the iPhone's CarPlay availability message with the car's Wi-Fi, AirPlay identity and the CarPlay theme asset, as LIVI does, so the iPhone actually fetches the theme. Needs CarPlay Ultra-Lite to have run CarPlay once (it saves the AirPlay identity). Turn it off, with the theme, if CarPlay stays black.",
+      "apply": "restart"
     }
   ]
 }

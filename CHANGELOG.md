@@ -1,3 +1,7 @@
+# 0.4.4-ceev.2 — experimental fork build
+
+- Setting `carplay_start_session` (default on): CarPlayStartSession (iAP2 `0x4301`), ported from the Ioniq 6 CarPlay Ultra-Lite bundle's EV Routing. The identification lists `0x4301` sent and `0x4300` received, and when the phone sends CarPlayAvailability (`0x4300`) the car answers with its Wi-Fi, AirPlay identity (written by CarPlay Ultra-Lite) and the theme asset, so the iPhone fetches the theme. Done by patching the stock handler table and message-list lengths in place from `libcarplayev.so`: no second identification builder hook, so it works beside Wireless's.
+
 # 0.4.4-ceev.1 — experimental fork build
 
 - Adds the 2023+ Ioniq 6 in Canada (`CEEV.CAN`, firmware `260903`): a `ceev` part and an Ioniq 6 profile (77.4 kWh Long Range, researched values, uncalibrated; not checked on a car). Before this the car matched no part, so `/system/etc/carplay.ev-routing/profile.json` was never installed and the mod failed at startup with "file not found".

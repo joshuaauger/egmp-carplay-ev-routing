@@ -3,6 +3,7 @@
 #include "bridge_core.c"
 extern void *dlopen(const char *,int);
 extern void *dlsym(void *,const char *);
+#include "startsession.c"
 
 /* No implicit NativeClient layout guessing on unknown builds: Java gates both
  * native files by exact hash before calling open. These offsets are ARM32-only. */
@@ -51,6 +52,17 @@ JNIEXPORT jint JNICALL Java_org_egmp_carplay_ev_app_NativeBridge_stop(JNIEnv *en
     (void)env;(void)cls;
     if(!api.context)return -10;
     return bridge_stop(session_from_client(client));
+}
+JNIEXPORT jint JNICALL Java_org_egmp_carplay_ev_app_NativeBridge_startSession(JNIEnv *env,jclass cls,jbyteArray msg){
+    (void)cls;
+    if(!api.context)return -10;
+    jsize n=msg?(*env)->GetArrayLength(env,msg):0;if(n<0 || n>START_MAX)return -12;
+    unsigned char bytes[START_MAX];if(n)(*env)->GetByteArrayRegion(env,msg,0,n,(jbyte*)bytes);
+    if((*env)->ExceptionCheck(env))return -12;
+    return start_session(bytes,(u32)n);
+}
+JNIEXPORT jint JNICALL Java_org_egmp_carplay_ev_app_NativeBridge_startSessionStatus(JNIEnv *env,jclass cls,jint which){
+    (void)env;(void)cls;return start_status(which);
 }
 _Static_assert(sizeof(void*)==4,"HU ABI is ARM32");
 

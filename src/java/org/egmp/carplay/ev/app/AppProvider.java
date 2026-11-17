@@ -33,6 +33,17 @@ public final class AppProvider {
         AppProvider next=new AppProvider(mod,app,service,profile);
         try {
         int opened=NativeBridge.open();if(opened!=0)throw new IllegalStateException("native open="+opened);
+        // CarPlayStartSession: answer the phone's CarPlayAvailability with the Wi-Fi, AirPlay identity and theme asset.
+        // The theme itself is named in the identification by the Wireless CarPlay mod (EvRouting.registerTheme).
+        // Not fatal: a failure here must never take the EV identity down with it.
+        if(mod.settingBoolean("carplay_start_session",true))try{
+            String theme=mod.settingString("carplay_theme","off").trim();
+            if("off".equals(theme))theme="";
+            byte[] start=StartSession.build(mod,app.context,theme);
+            int armed=start!=null?NativeBridge.startSession(start):-1;
+            if(start!=null && armed!=0)mod.log("CarPlayStart not armed: "+armed);
+            else if(start!=null)StartSession.watch(mod,app.context,theme,StartSession.addresses(StartSession.HOTSPOT));
+        }catch(Throwable error){mod.error("CarPlayStart",error);}
         Object raw=Points.call(app.classLoader,"iap2.service.on_bind",service,new Intent());
         next.binder=IIap2Service.Stub.asInterface((IBinder)raw);
         Iap2ListenerInfo info=new Iap2ListenerInfo();info.onSetListenerName("CarPlayEV");info.onSetSupportType(0x100);
