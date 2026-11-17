@@ -1,5 +1,6 @@
-# Builds the mod the way docs/BUILDING.md says (tools/build-release.py), on a clean runner, signed with a
-# throwaway key (a test build: it installs once with a warning and can't be updated by a later package).
+# Builds the mod the way docs/BUILDING.md says (tools/build-release.py), on a clean runner, signed with the
+# shared author key (secret MOD_KEY, base64 of the key file; its public half is .github/mod-key.pub). Without the
+# secret, or on a pull request, a throwaway key: it installs once with a warning and can't be updated.
 # HMG-API and the Wireless CarPlay mod (its CarPlayIdentification API) are checked out at pinned commits.
 name: CI
 
@@ -63,14 +64,26 @@ jobs:
           A=$(ls -d "$ANDROID_HOME"/platforms/android-34/android.jar 2>/dev/null || ls -d "$ANDROID_HOME"/platforms/android-*/android.jar | sort -V | tail -1)
           echo "ANDROID_JAR=$A" >> "$GITHUB_ENV"
 
-      - name: A throwaway key; its UUID is this build's author
+      - name: The author key, and its UUID as this build's author
+        env:
+          MOD_KEY: ${{ secrets.MOD_KEY }}
+          EVENT: ${{ github.event_name }}
         run: |
           mkdir -p .deps/hmgapi-classes
           javac --release 8 -Xlint:-options -nowarn -cp "$ANDROID_JAR:.deps/jars/json.jar" -d .deps/hmgapi-classes \
               $(find .deps/hmgapi/core/runtime/java .deps/hmgapi/core/runtime/stubs -name '*.java')
-          K="$RUNNER_TEMP/throwaway.key"
-          java -cp .deps/hmgapi-classes:.deps/jars/json.jar hmgapi.engine.Signing keygen "$K"
-          UUID=$(java -cp .deps/hmgapi-classes:.deps/jars/json.jar hmgapi.engine.Signing uuid "$K")
+          ENG="java -cp .deps/hmgapi-classes:.deps/jars/json.jar hmgapi.engine.Signing"
+          K="$RUNNER_TEMP/author.key"
+          if [ -n "$MOD_KEY" ] && [ "$EVENT" != pull_request ]; then
+            (umask 077; echo "$MOD_KEY" | base64 -d > "$K")
+            cp .github/mod-key.pub "$K.pub"
+            [ "$($ENG uuid "$K")" = "$($ENG uuid .github/mod-key.pub)" ] || { echo "MOD_KEY isn't the private half of .github/mod-key.pub"; exit 1; }
+            echo "Signed with the shared author key (.github/mod-key.pub)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            $ENG keygen "$K"
+            echo "No MOD_KEY here (a pull request, or no secret): signed with a throwaway key" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          UUID=$($ENG uuid "$K")
           python3 - "$UUID" <<'PY'
           import json, sys
           c = json.load(open("release.json"))
@@ -89,6 +102,10 @@ jobs:
               --hmgapi-source .deps/hmgapi --wireless-source .deps/wireless \
               --android-jar "$ANDROID_JAR" --d8-jar .deps/jars/r8.jar --json-jar .deps/jars/json.jar \
               --key "$KEY" --java-home "$JAVA_HOME" --lld ld.lld
+
+      - name: Forget the key
+        if: always()
+        run: rm -f "$RUNNER_TEMP"/author.key*
 
       - name: Package contents
         run: |

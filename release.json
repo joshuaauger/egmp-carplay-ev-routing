@@ -2,7 +2,7 @@
   "version": "0.4.4-ceev.3",
   "nemesis_id": "carplay.ev-routing",
   "mod_id": "egmp-carplay-ev-routing",
-  "author_uuid": "b45fb2d9-e6e8-83a2-bce9-cd5c40d2232d",
+  "author_uuid": "6ed33151-8b1f-8033-b3a5-5e1134ead3fa",
   "minimum_hmgapi": "1.0.0-beta.6",
   "minimum_hmgapi_package": "0.99.6",
   "native_md5": {
