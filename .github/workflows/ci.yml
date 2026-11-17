@@ -23,6 +23,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # the release at the end
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -122,3 +124,24 @@ jobs:
             dist/testing/*.zip
             out/build-report.json
           retention-days: 30
+
+      # Every signed build ends in a release: v<version>, a prerelease with the packages and the CHANGELOG
+      # section for that version. A rebuild of the same version replaces its assets.
+      - name: Release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=$(python3 -c "import json; print(json.load(open('release.json'))['version'])")
+          t="v$v"
+          awk -v v="$v" 'index($0,"# ")==1 || index($0,"## ")==1 { if (on) exit; if (index($0, v)) { on=1; next } } on' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          printf '\nBuilt from %s (%s).\n' "${GITHUB_SHA:0:7}" "$GITHUB_REF_NAME" >> "$RUNNER_TEMP/notes.md"
+          files=$(ls dist/egmp-carplay-ev-routing-v*.zip dist/*SHA256SUMS 2>/dev/null)
+          [ -n "$files" ] || { echo "no packages to release"; exit 1; }
+          if gh release view "$t" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$t" $files --clobber -R "$GITHUB_REPOSITORY"
+            gh release edit "$t" --notes-file "$RUNNER_TEMP/notes.md" -R "$GITHUB_REPOSITORY"
+          else
+            gh release create "$t" $files --prerelease --target "$GITHUB_SHA" --title "EV Routing $v" --notes-file "$RUNNER_TEMP/notes.md" -R "$GITHUB_REPOSITORY"
+          fi
+          echo "Released $t: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$t" >> "$GITHUB_STEP_SUMMARY"
