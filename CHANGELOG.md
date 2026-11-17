@@ -1,3 +1,7 @@
+# 0.4.4-ceev.3 — experimental fork build
+
+- Logs why the CarPlay EV service failed to start (`CarPlayEV start failed: …`, `CarPlayEV native load failed: …`) as one readable line, ahead of the stack trace.
+
 # 0.4.4-ceev.2 — experimental fork build
 
 - Setting `carplay_start_session` (default on): CarPlayStartSession (iAP2 `0x4301`), ported from the Ioniq 6 CarPlay Ultra-Lite bundle's EV Routing. The identification lists `0x4301` sent and `0x4300` received, and when the phone sends CarPlayAvailability (`0x4300`) the car answers with its Wi-Fi, AirPlay identity (written by CarPlay Ultra-Lite) and the theme asset, so the iPhone fetches the theme. Done by patching the stock handler table and message-list lengths in place from `libcarplayev.so`: no second identification builder hook, so it works beside Wireless's.

@@ -85,7 +85,8 @@ public final class EvRouting extends ModEntry {
                 if(p.hasThrowable())return;
                 // All native calls must resolve in the app-part loader.
                 Class<?> bridge=mod.appPart(app,"org.egmp.carplay.ev.app.NativeBridge");
-                bridge.getMethod("load",String.class).invoke(null,"/system/lib/libcarplayev.so");
+                try{bridge.getMethod("load",String.class).invoke(null,"/system/lib/libcarplayev.so");}
+                catch(java.lang.reflect.InvocationTargetException failure){mod.log("CarPlayEV native load failed: "+failure.getCause());throw failure;}
                 part.getMethod("start",ModContext.class,LoadedApp.class,Object.class,String.class).invoke(null,mod,app,p.thisObject,profile);
             }
         });

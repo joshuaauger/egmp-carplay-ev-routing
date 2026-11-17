@@ -49,7 +49,7 @@ public final class AppProvider {
         Iap2ListenerInfo info=new Iap2ListenerInfo();info.onSetListenerName("CarPlayEV");info.onSetSupportType(0x100);
         instance=next;
         if(!next.binder.Iap2SvcInit(next.listener,info))throw new IllegalStateException("listener refused");
-        } catch(Throwable failure){instance=null;next.close();throw failure;}
+        } catch(Throwable failure){mod.log("CarPlayEV start failed: "+failure);instance=null;next.close();throw failure;}
         mod.log("CarPlayEV semantic listener registered");
     }
     public static synchronized void stop(){if(instance!=null){instance.close();instance=null;}}
