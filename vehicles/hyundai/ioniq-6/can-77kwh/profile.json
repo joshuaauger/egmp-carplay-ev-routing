@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "profile_id": "hyundai.ioniq6.ca.77kwh",
+  "profile_version": 1,
+  "vehicle": {
+    "manufacturer": "Hyundai",
+    "model": "Ioniq 6",
+    "market": "CA",
+    "default_display_name": "Hyundai Ioniq 6",
+    "display_name": "Hyundai Ioniq 6"
+  },
+  "battery": {
+    "minimum_energy_wh": 0,
+    "maximum_energy_wh": 74000
+  },
+  "connectors": [
+    {
+      "type": "ccs1",
+      "maximum_power_w": 233000
+    },
+    {
+      "type": "j1772",
+      "maximum_power_w": 10900
+    }
+  ],
+  "charging_contract": {
+    "model_id": 12582922,
+    "vehicle_parameters": {
+      "vehicle_energy_axis_wh": [
+        0,
+        7400,
+        33300,
+        37000,
+        51800,
+        59200,
+        62900,
+        66600,
+        70300,
+        72520,
+        74000
+      ],
+      "vehicle_charge_axis_w": [
+        205000,
+        221000,
+        233000,
+        186000,
+        184000,
+        158000,
+        122000,
+        63000,
+        40000,
+        23000,
+        12000
+      ],
+      "energy_w_per_h": [
+        0,
+        3500,
+        7050,
+        10800,
+        14450,
+        17900,
+        21600,
+        25200,
+        28850,
+        32550,
+        36200,
+        39750,
+        43400,
+        47250,
+        50700,
+        54650,
+        58250,
+        62100,
+        65750,
+        69550,
+        73650
+      ],
+      "efficiency_factor": 0.95
+    }
+  },
+  "consumption_contract": {
+    "model_id": 12582921,
+    "vehicle_parameters": {
+      "vehicle_auxiliary_power_w": 400.0,
+      "vehicle_consumption_values_wh_per_m": [
+        0.1961,
+        0.1586,
+        0.16808,
+        0.18609,
+        0.14973,
+        0.14973,
+        0.1593,
+        0.17852,
+        0.19714,
+        0.22481
+      ],
+      "vehicle_altitude_gain_consumption_wh_per_m": 6.29,
+      "vehicle_altitude_loss_consumption_wh_per_m": 4.24
+    }
+  }
+}

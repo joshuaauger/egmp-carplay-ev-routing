@@ -19,10 +19,10 @@ def classjar(folder,path):
  with zipfile.ZipFile(path,'w',zipfile.ZIP_DEFLATED) as z:
   for p in sorted(folder.rglob('*.class')):z.write(p,p.relative_to(folder).as_posix())
 def version_key(value):
- m=re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?',value)
+ m=re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:-(beta|rc)\.(\d+))?',value)
  if not m:raise SystemExit('Unsupported HMG-API version: '+value)
- major,minor,patch,beta=m.groups()
- return (int(major),int(minor),int(patch),1 if beta is None else 0,int(beta or 0))
+ major,minor,patch,kind,number=m.groups()
+ return (int(major),int(minor),int(patch),{'beta':0,'rc':1,None:2}[kind],int(number or 0))
 def main():
  ap=argparse.ArgumentParser(description=__doc__)
  for arg in ('hmgapi-source','wireless-source','android-jar','d8-jar','json-jar','key'):ap.add_argument('--'+arg,required=True,type=Path)
@@ -72,7 +72,7 @@ def main():
  lines=[];evidence=[];mod=out/'mod'
  if mod.exists():shutil.rmtree(mod)
  mod.mkdir();meta=json.loads((R/'mod.json').read_text());meta['version']=version
- (mod/'mod.json').write_text(json.dumps(meta,indent=2)+'\n');shutil.copyfile(R/'patches.json',mod/'patches.json');shutil.copyfile(R/'LICENSE',mod/'LICENSE');shutil.copyfile(R/'NOTICE.md',mod/'NOTICE.md')
+ (mod/'mod.json').write_text(json.dumps(meta,indent=2)+'\n');shutil.copyfile(R/'patches.json',mod/'patches.json');shutil.copyfile(R/'settings.json',mod/'settings.json');shutil.copyfile(R/'LICENSE',mod/'LICENSE');shutil.copyfile(R/'NOTICE.md',mod/'NOTICE.md')
  for path,src in [('files/libcarplayev.so',out/'libcarplayev.so'),('svc/capture.sh',R/'svc/capture.sh')]:
   target=mod/path;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,target)
  for entry in config['profiles']:
@@ -95,7 +95,7 @@ def main():
  # Explicit source roots; no tools, keys, host binaries, previous builds or captures.
  with tempfile.TemporaryDirectory() as t:
   source=Path(t)/name;source.mkdir()
-  for rel in ['README.md','CHANGELOG.md','LICENSE','NOTICE.md','.gitignore','release.json','mod.json','patches.json','src','stubs','svc','vehicles','packaging','tools','tests','docs','images']:
+  for rel in ['README.md','CHANGELOG.md','LICENSE','NOTICE.md','.gitignore','release.json','mod.json','patches.json','settings.json','src','stubs','svc','vehicles','packaging','tools','tests','docs','images']:
    src=R/rel
    if src.is_dir():shutil.copytree(src,source/rel,ignore=shutil.ignore_patterns('.DS_Store','._*','__pycache__','*.pyc'))
    else:shutil.copyfile(src,source/rel)

@@ -1,0 +1,102 @@
+# Builds the mod the way docs/BUILDING.md says (tools/build-release.py), on a clean runner, signed with a
+# throwaway key (a test build: it installs once with a warning and can't be updated by a later package).
+# HMG-API and the Wireless CarPlay mod (its CarPlayIdentification API) are checked out at pinned commits.
+name: CI
+
+on:
+  push:
+    branches: [main, "port/**", "codex/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HMGAPI_REF: b459567eed0a4c5645efe2deb349b46a3523a422
+  WIRELESS_REPO: joshuaauger/hmgapi-wireless-cp-aa
+  WIRELESS_REF: 707e2bb4c65e19c7f7c53a26c26d89f0999a4a89
+  R8_SHA256: 4733945987ee0a840fafc34080b135259e01678412e07212b23f706334290294
+  JSON_SHA256: 3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Open-HMG/HMG-API
+          ref: ${{ env.HMGAPI_REF }}
+          path: .deps/hmgapi
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ env.WIRELESS_REPO }}
+          ref: ${{ env.WIRELESS_REF }}
+          path: .deps/wireless
+          persist-credentials: false
+
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -yq clang lld
+          pip install pyelftools==0.32
+          mkdir -p .deps/jars
+          curl -fsSL -o .deps/jars/r8.jar https://dl.google.com/dl/android/maven2/com/android/tools/r8/8.5.35/r8-8.5.35.jar
+          curl -fsSL -o .deps/jars/json.jar https://repo1.maven.org/maven2/org/json/json/20240303/json-20240303.jar
+          echo "$R8_SHA256  .deps/jars/r8.jar" | sha256sum -c -
+          echo "$JSON_SHA256  .deps/jars/json.jar" | sha256sum -c -
+          A=$(ls -d "$ANDROID_HOME"/platforms/android-34/android.jar 2>/dev/null || ls -d "$ANDROID_HOME"/platforms/android-*/android.jar | sort -V | tail -1)
+          echo "ANDROID_JAR=$A" >> "$GITHUB_ENV"
+
+      - name: A throwaway key; its UUID is this build's author
+        run: |
+          mkdir -p .deps/hmgapi-classes
+          javac --release 8 -Xlint:-options -nowarn -cp "$ANDROID_JAR:.deps/jars/json.jar" -d .deps/hmgapi-classes \
+              $(find .deps/hmgapi/core/runtime/java .deps/hmgapi/core/runtime/stubs -name '*.java')
+          K="$RUNNER_TEMP/throwaway.key"
+          java -cp .deps/hmgapi-classes:.deps/jars/json.jar hmgapi.engine.Signing keygen "$K"
+          UUID=$(java -cp .deps/hmgapi-classes:.deps/jars/json.jar hmgapi.engine.Signing uuid "$K")
+          python3 - "$UUID" <<'PY'
+          import json, sys
+          c = json.load(open("release.json"))
+          c["author_uuid"] = sys.argv[1]
+          json.dump(c, open("release.json", "w"), indent=2)
+          PY
+          echo "KEY=$K" >> "$GITHUB_ENV"
+
+      - name: Build, test and package (tools/build-release.py)
+        run: |
+          python3 tools/build-release.py \
+              --hmgapi-source .deps/hmgapi --wireless-source .deps/wireless \
+              --android-jar "$ANDROID_JAR" --d8-jar .deps/jars/r8.jar --json-jar .deps/jars/json.jar \
+              --key "$KEY" --java-home "$JAVA_HOME" --lld ld.lld
+
+      - name: Package contents
+        run: |
+          unzip -l dist/egmp-carplay-ev-routing-v*.zip | grep -v -- '-----' | grep -E "profiles/|settings.json|libcarplayev|mod.json"
+          cat out/build-report.json | head -40
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ev-routing-test-package
+          path: |
+            dist/egmp-carplay-ev-routing-v*.zip
+            dist/*SHA256SUMS
+            dist/testing/*.zip
+            out/build-report.json
+          retention-days: 30

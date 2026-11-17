@@ -1,7 +1,7 @@
 {
   "id": "egmp-carplay-ev-routing",
   "name": "E-GMP CarPlay EV Routing",
-  "version": "0.4.3",
+  "version": "0.4.4-ceev.1",
   "hmgapi": ">=1.0.0-beta.6 <2.0.0",
   "authors": [
     "E-GMP CarPlay EV Routing contributors"
@@ -29,6 +29,13 @@
       ],
       "region": "USA",
       "firmware": "260507"
+    },
+    {
+      "model": [
+        "CEEV"
+      ],
+      "region": "CAN",
+      "firmware": "260903"
     }
   ],
   "requires": [
@@ -87,6 +94,16 @@
         ],
         "region": "USA",
         "firmware": "260507"
+      }
+    },
+    {
+      "id": "ceev",
+      "system": {
+        "model": [
+          "CEEV"
+        ],
+        "region": "CAN",
+        "firmware": "260903"
       }
     }
   ]

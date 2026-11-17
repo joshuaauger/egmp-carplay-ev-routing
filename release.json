@@ -1,5 +1,5 @@
 {
-  "version": "0.4.3",
+  "version": "0.4.4-ceev.1",
   "nemesis_id": "carplay.ev-routing",
   "mod_id": "egmp-carplay-ev-routing",
   "author_uuid": "b45fb2d9-e6e8-83a2-bce9-cd5c40d2232d",
@@ -30,6 +30,13 @@
       "firmware": "260507",
       "path": "hyundai/ioniq-5/us-77kwh/profile.json",
       "status": "experimental 2022 compatibility; on-car validation pending"
+    },
+    {
+      "prefix": "CEEV.CAN.",
+      "model": "CEEV",
+      "firmware": "260903",
+      "path": "hyundai/ioniq-6/can-77kwh/profile.json",
+      "status": "Ioniq 6 Long Range; researched values, uncalibrated; untested on a car"
     }
   ]
 }

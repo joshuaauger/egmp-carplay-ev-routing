@@ -1,3 +1,9 @@
+# 0.4.4-ceev.1 — experimental fork build
+
+- Adds the 2023+ Ioniq 6 in Canada (`CEEV.CAN`, firmware `260903`): a `ceev` part and an Ioniq 6 profile (77.4 kWh Long Range, researched values, uncalibrated; not checked on a car). Before this the car matched no part, so `/system/etc/carplay.ev-routing/profile.json` was never installed and the mod failed at startup with "file not found".
+- Setting `carplay_theme`: names a CarPlay theme asset in the identification through the Wireless CarPlay mod's `registerTheme` (needs `wireless-carplay-aa` 2.2.0-rc.4 or later). The EV identity is unchanged by it.
+- Based on the `codex/carplay-identity-api` branch (0.4.3 plus the Wireless identification API): no own `libiap2session` patch, so it works beside Wireless's.
+
 # 0.4.3 — experimental
 
 - Send vehicle status every ten seconds instead of every five seconds.

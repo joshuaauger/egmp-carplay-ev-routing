@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "settings": [
+    {
+      "key": "carplay_theme",
+      "type": "choice",
+      "default": "44C9FA31EC:985:19.0",
+      "title": "CarPlay theme",
+      "description": "Names a CarPlay Ultra theme in the car's wireless CarPlay identification (through the Wireless CarPlay mod), so the iPhone can download it from Apple and offer theme sync. Needed by CarPlay Ultra-Lite's Ultra theme; turn it off with CarPlay Ultra off, or if CarPlay stays black. Restart the head unit afterwards and forget and pair the iPhone again. The EV vehicle identity Apple Maps uses for routing is not changed by it.",
+      "apply": "restart",
+      "options": [
+        {
+          "value": "off",
+          "title": "Off (stock identification)"
+        },
+        {
+          "value": "44C9FA31EC:985:19.0",
+          "title": "44C9FA31EC v985 (LIVI's default)"
+        },
+        {
+          "value": "44C9FA31EC-Single:547:19.0",
+          "title": "44C9FA31EC-Single v547"
+        }
+      ]
+    }
+  ]
+}

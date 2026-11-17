@@ -14,6 +14,7 @@ public final class EvRouting extends ModEntry {
     private Class<?> part;
     private CarPlayIdentification identityApi;
     private CarPlayIdentification.VehicleIdentity identityContribution;
+    private Object themeContribution;
     public void zygoteInit(ModContext mod) throws Throwable {
         sessionMd5=ModContext.md5("/system/lib/libiap2session.so");
         clientMd5=ModContext.md5("/system/lib/libiap2client.so");
@@ -28,6 +29,24 @@ public final class EvRouting extends ModEntry {
         identityApi=identityApi(mod);
         identityContribution=vehicleIdentity(new JSONObject(profile));
         if(identityApi!=null)identityApi.registerVehicle(mod.id,identityContribution);
+        registerTheme(mod);
+    }
+    /** Setting carplay_theme ("id:version:sdk", or off): names a CarPlay theme asset in the identification,
+     * through the wireless mod's API, so the iPhone can offer and download it. Never stops the vehicle identity. */
+    private void registerTheme(ModContext mod){
+        String theme=mod.settingString("carplay_theme","off").trim();
+        if(identityApi==null || "off".equals(theme) || theme.length()==0)return;
+        try {
+            String[] t=theme.split(":");
+            if(t.length!=3)throw new IllegalArgumentException("carplay_theme must be id:version:sdk, got "+theme);
+            CarPlayIdentification.ThemeIdentity next=new CarPlayIdentification.ThemeIdentity(t[0],Long.parseLong(t[1]),t[2]);
+            identityApi.registerTheme(mod.id,next);
+            themeContribution=next;
+            mod.log("CarPlayEV CarPlay theme "+next.encoded()+" in the wireless identification");
+        } catch(Throwable error){
+            // an older wireless mod without registerTheme, or a refused theme: EV routing carries on without it
+            mod.error("CarPlayEV CarPlay theme not set",error);
+        }
     }
     private static CarPlayIdentification identityApi(ModContext mod) {
         Object published=mod.use("wireless-carplay-aa",CarPlayIdentification.SERVICE);
@@ -79,8 +98,12 @@ public final class EvRouting extends ModEntry {
         if(enabled){
             if(identityApi!=null && identityContribution!=null)
                 identityApi.registerVehicle(mod.id,identityContribution);
+            registerTheme(mod);
         }else{
-            if(identityApi!=null)identityApi.removeVehicle(mod.id);
+            if(identityApi!=null){
+                identityApi.removeVehicle(mod.id);
+                if(themeContribution!=null){try{identityApi.removeTheme(mod.id);}catch(Throwable ignored){}themeContribution=null;}
+            }
             if(runningMod==mod)stop();
         }
         // Re-enable requires service restart so a new stock listener can register.
