@@ -79,6 +79,10 @@ jobs:
           PY
           echo "KEY=$K" >> "$GITHUB_ENV"
 
+      - name: HMG-API's maps as the unit reads them (the repo keeps a base map plus each build's differences)
+        run: |
+          (cd .deps/hmgapi && python3 tools/maplib.py expand "$RUNNER_TEMP/maps-expanded" && cp -R "$RUNNER_TEMP/maps-expanded/." maps/)
+
       - name: Build, test and package (tools/build-release.py)
         run: |
           python3 tools/build-release.py \
